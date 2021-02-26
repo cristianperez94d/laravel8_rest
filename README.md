@@ -31,8 +31,10 @@ php artisan serve
 ```
 6. Endpoints 
 
-- "http://127.0.0.1:8000/api/book/"
-  Metodos GET, POST, DELETE
+- "http://127.0.0.1:8000/api/book/" => listar libros (metodo GET)
+- "http://127.0.0.1:8000/api/book/create/{id} " => crear libro (metodo GET)
+- "http://127.0.0.1:8000/api/book/{book}" => eliminar libro (metodo DELETE)
+- "http://127.0.0.1:8000/api/book/{book}" => detalles libro (metodo GET)
 
 
 ## Prerequisites <a name = "prerequisites"></a>

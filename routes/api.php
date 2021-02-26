@@ -19,4 +19,8 @@ use App\Http\Controllers\BookController;
 //     return $request->user();
 // });
 
-Route::resource('book', BookController::class);
+Route::get('book/create/{id}', [BookController::class, 'createBook']);
+Route::resource('book', BookController::class)->except([
+    'create', 'store', 'edit', 'update'
+]);
+

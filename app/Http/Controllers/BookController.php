@@ -28,7 +28,34 @@ class BookController extends ApiController
      */
     public function create()
     {
-        //
+
+    }
+
+    public function createBook($id, Request $request)
+    {
+        $endpoint = 'https://openlibrary.org/api/books?bibkeys=ISBN:'.$id.'&amp;jscmd=data&amp;format=json&#39';
+        $data = json_decode( file_get_contents($endpoint), true );
+
+        if(!$data){
+            return $this->errorResponse("El ISBN no existe", 404);
+        }
+        
+        $argument = "ISBN:".$id;
+        $request['id'] = $id;
+        $request['title'] = $data[$argument]['title'];
+        $request['cover'] = isset($data[$argument]['cover']) ? $data[$argument]['cover']['large'] : 'No aplica';
+    
+        //create book
+        $book = Book::create($request->all());
+        $book = Book::find($id);
+            
+        // create authors
+        $authors = isset($data[$argument]['authors']) ? $data[$argument]['authors']['authors'] : [];
+        foreach ($authors as $key => $value) {
+            $author = Author::create(['name'=> $value['name'], 'book_id' => $book->id]);
+        }
+
+        return $this->showOne($book, 201, 'Registro almacenado correctamente..');
     }
 
     /**
@@ -39,31 +66,7 @@ class BookController extends ApiController
      */
     public function store(Request $request)
     {
-        $reglas = [
-            'isbn' => ['required'],
-        ];
         
-        // validar datos
-        $request->validate($reglas);
-        $endpoint = 'https://openlibrary.org/api/books?bibkeys=ISBN:'.$request->isbn.'&amp;jscmd=data&amp;format=json&#39';
-        $data = json_decode( file_get_contents($endpoint), true );
-
-        $argument = "ISBN:".$request->isbn;
-        $request['id'] = $request->isbn;
-        $request['title'] = $data[$argument]['title'];
-        $request['cover'] = $data[$argument]['cover']['large'];
-    
-        //create book
-        $book = Book::create($request->all());
-        $book = Book::find($request->isbn);
-
-        // create authors
-        $authors = $data[$argument]['authors'];
-        foreach ($authors as $key => $value) {
-            $author = Author::create(['name'=> $value['name'], 'book_id' => $book->id]);
-        }
-
-        return $this->showOne($book, 201, 'Registro almacenado correctamente..');
     }
 
     /**

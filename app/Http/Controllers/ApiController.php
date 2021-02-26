@@ -23,17 +23,24 @@ class ApiController extends Controller
         if( $collection->isEmpty() ){
             return $this->successResponse(['data' => $collection], $code);
         }
+        
+        $resource = $collection->first()->resource;
+        $resourceCollection = $collection->first()->resourceCollection;        
+        $collection = $this->transformCollection($collection, $resource, $resourceCollection);
+        
         $collection = $this->paginate($collection);
         
         return $this->successResponse($collection, $code, $message);
     }
     
-    protected function showOne(Model $instance, $code = 200, $message = "Ok"){        
+    protected function showOne(Model $instance, $code = 200, $message = "Ok"){   
+        $resource = $instance->resource;
+        $instance = $this->transformModel($instance, $resource);
         return $this->successResponse($instance, $code, $message);
     }    
     
     // paginar los datos
-    protected function paginate (Collection $collection){
+    protected function paginate ($collection){
         
         $rules = [
             'per_page' => ['integer', 'min:2', 'max:50']
@@ -62,6 +69,20 @@ class ApiController extends Controller
         return $paginated;
         
     }    
+
+      // transformation of model with resource
+    private function transformModel(Model $model, $resource){
+        $transform =  new $resource($model);
+
+        return $transform;
+    }
+
+    // transformer of collections with resource
+    private function transformCollection(Collection $collection, $resource, $resourceCollection){
+        $transform = $resource::collection($collection);    
+        
+        return new $resourceCollection($transform);
+    }
 
 
 }
